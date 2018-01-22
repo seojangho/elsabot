@@ -25,6 +25,7 @@ class Host {
     }
 
     async heartbeat() {
+        console.log(`${this.hostId} beats!`);
         if (this.status === HostStatus.WAITING_REBOOT) {
             return;
         }
@@ -42,6 +43,7 @@ class Host {
 
     async transition(newStatus) {
         const oldStatus = this.status;
+        console.log(`${this.hostId} ${this.oldStatus} -> ${this.newStatus}`);
         if (oldStatus === newStatus) {
             return;
         }
