@@ -1,0 +1,37 @@
+{
+    "command_prefix": "ssh -p50022 mango.jangho.io -- ",
+    "supervised": true,
+    "ping": {
+        "count": 1,
+        "deadline": 9,
+        "loop_interval": 10,
+        "num_trials_before_down": 3,
+        "reboot_wait": 300
+    },
+    "slack": {
+        "token": "??????????????",
+        "channel": "D8W9MMTHQ",
+        "verification_token": "????????????????",
+        "port": 50000
+    },
+    "host": [
+        {
+            "id": "Elsa-04",
+            "ping_host": "147.46.216.181",
+            "ipmi_host": "147.46.15.53",
+            "password": "?????????????"
+        },
+        {
+            "id": "Elsa-05",
+            "ping_host": "147.46.216.165",
+            "ipmi_host": "147.46.15.54",
+            "password": "??????????????????"
+        },
+        {
+            "id": "Elsa-06",
+            "ping_host": "147.46.216.202",
+            "ipmi_host": "147.46.15.55",
+            "password": "?????????"
+        }
+    ]
+}
