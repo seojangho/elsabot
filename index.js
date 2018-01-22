@@ -43,7 +43,7 @@ class Host {
 
     async transition(newStatus) {
         const oldStatus = this.status;
-        console.log(`${this.hostId} ${this.oldStatus} -> ${this.newStatus}`);
+        console.log(`${this.hostId} ${oldStatus} -> ${newStatus}`);
         if (oldStatus === newStatus) {
             return;
         }
