@@ -97,7 +97,7 @@ async function rebootRequested(callbackId, username) {
     }
 }
 
-listener.action(CALLBACK_ID, payload => console.log(payload));
+listener.action({}, payload => console.log(payload));
 
 listener.start(port).then(() => {
     console.log(`Listening on ${port}`);
