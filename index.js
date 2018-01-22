@@ -270,7 +270,7 @@ if (process.env.ELSABOT_STARTUP_MESSAGE) {
           {
             'title': `Hi, there! Elsabot is up and running!`,
             'color': '#2222aa',
-            'text': `The following hosts are covered: \n` + hostList.map(host => `• ${host.hostId} (ping \`${host.pingHost}\`, IPMI \`${host.ipmiHost}\`)`).join('\n'),
+            'text': `The following hosts are covered: \n` + hostList.map(host => `• ${host.hostId} (ping ${host.pingHost}, IPMI ${host.ipmiHost})`).join('\n'),
             'mrkdwn': true
           },
           {
