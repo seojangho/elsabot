@@ -96,7 +96,7 @@ async function rebootRequested(callbackId, userId) {
     if (elsa === undefined) {
         return;
     }
-    return await web.chat.update(channelId, '', elsa.requestedNotification(userId));
+    return await web.chat.update(elsa.messageTs, channelId, '', elsa.requestedNotification(userId));
 }
 
 listener.action({}, payload => rebootRequested(payload.callback_id, payload.user.id));
