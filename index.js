@@ -2,6 +2,7 @@ const { WebClient } = require('@slack/client');
 const { createMessageAdapter } = require('@slack/interactive-messages');
 const uuidv4 = require('uuid/v4');
 const fs = require('fs');
+const { exec } = require('child_process');
 
 class SleepingElsa {
     constructor(elsaId, callbackId) {
@@ -97,7 +98,26 @@ async function rebootRequested(callbackId, userId) {
     if (elsa === undefined) {
         return await web.chat.postEphemeral(channelId, 'Unknown callbackId\n(It seems that elsabot has suffered a restart. Sorry about that.)', userId);
     }
-    return await web.chat.update(elsa.messageTs, channelId, '', elsa.requestedNotification(userId));
+    try {
+        console.log(await rebootElsa(elsa.elsaId));
+        await web.chat.update(elsa.messageTs, channelId, '', elsa.requestedNotification(userId));
+    } catch (e) {
+        console.error(e);
+        await web.chat.postEphemeral(channelId, 'Unknown error. Sorry about that.', userId);
+    }
+}
+
+function rebootElsa(elsaId) {
+    const elsaEntry = elsaList[elsaId + ''];
+    return new Promise((resolve, reject) => {
+        exec(`ssh -p50022 mango.jangho.io -- ipmitool -I lanplus -H ${elsaEntry.ipmi} -U elsabot -L OPERATOR -P ${elsaEntry.password} power status`, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(stdout);
+            }
+        });
+    });
 }
 
 listener.action({}, payload => rebootRequested(payload.callback_id, payload.user.id));
