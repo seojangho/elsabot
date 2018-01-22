@@ -264,18 +264,20 @@ listener.start(slackConfig['port']).then(() => {
 
 globalHeartbeat().catch(reason => console.error(reason));
 
-web.chat.postMessage(channelId, '', {
-    attachments: [
-      {
-        'title': `Hi, there! Elsabot is up and running!`,
-        'color': '#2222aa',
-        'text': `The following hosts are covered: \n` + hostList.map(host => `• ${host.hostId} (ping \`${host.pingHost}\`, IPMI \`${host.ipmiHost}\`)`).join('\n'),
-        'mrkdwn': true
-      },
-      {
-        'color': '#2222aa',
-        'title': `The bot is running in ${globalSupervised ? 'supervised' : 'automatic'} mode`,
-        'text': globalSupervised ? `I'll ask for confirmation before actually rebooting the host.` : `I'll try automatic reboot on discovering unresponsive host.`
-      }
-    ]
-  }).catch(reason => console.error(reason));
+if (process.env.ELSABOT_STARTUP_MESSAGE) {
+    web.chat.postMessage(channelId, '', {
+        attachments: [
+          {
+            'title': `Hi, there! Elsabot is up and running!`,
+            'color': '#2222aa',
+            'text': `The following hosts are covered: \n` + hostList.map(host => `• ${host.hostId} (ping \`${host.pingHost}\`, IPMI \`${host.ipmiHost}\`)`).join('\n'),
+            'mrkdwn': true
+          },
+          {
+            'color': '#2222aa',
+            'title': `The bot is running in ${globalSupervised ? 'supervised' : 'automatic'} mode`,
+            'text': globalSupervised ? `I'll ask for confirmation before actually rebooting the host.` : `I'll try automatic reboot on discovering unresponsive host.`
+          }
+        ]
+      }).catch(reason => console.error(reason));
+}
