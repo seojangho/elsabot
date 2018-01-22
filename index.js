@@ -88,17 +88,18 @@ async function sleepingElsaDetected(elsaId) {
     if (elsa === undefined) {
         return;
     }
-    return await web.chat.postMessage(channelId, '', elsa.sleepNotification).then(response => console.log(response));
+    return await web.chat.postMessage(channelId, '', elsa.sleepNotification).then(response => elsa.messageTs = response.ts);
 }
 
-async function rebootRequested(callbackId, username) {
+async function rebootRequested(callbackId, userId) {
     const elsa = botState.tryRemoveByCallbackId(callbackId);
     if (elsa === undefined) {
         return;
     }
+    return await web.chat.update(channelId, '', elsa.requestedNotification(userId));
 }
 
-listener.action({}, payload => console.log(payload));
+listener.action({}, payload => rebootRequested(payload.callback_id, payload.user.id));
 
 listener.start(port).then(() => {
     console.log(`Listening on ${port}`);
