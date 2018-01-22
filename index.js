@@ -191,6 +191,10 @@ class MessageCards {
     }
 
     addByHost(host, recurred) {
+        const oldCard = this.tryGetByHostId(host.hostId);
+        if (oldCard !== undefined) {
+            this.remove(oldCard);
+        }
         const card = new MessageCard(host, recurred);
         this.hostIdMap[host.hostId] = card;
         this.callbackIdMap[card.callbackId] = card;
