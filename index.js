@@ -63,7 +63,7 @@ class Host {
                 break;
             }
             case HostStatus.DOWN: {
-                if (oldStatus === HostStatus.TESTING_REBOOT) {
+                if (oldStatus === HostStatus.TESTING_REBOOT || oldStatus === HostStatus.WAITING_REBOOT) {
                     if (messageCard !== undefined) {
                         messageCard.dropToSupervised = !this.supervised && !globalSupervised;
                         await messageCard.post();
