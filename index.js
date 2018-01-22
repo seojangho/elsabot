@@ -2,7 +2,6 @@ const { WebClient } = require('@slack/client');
 const { createMessageAdapter } = require('@slack/interactive-messages');
 const uuidv4 = require('uuid/v4');
 
-const CALLBACK_ID = 'reboot';
 
 class SleepingElsa {
     constructor(elsaId, callbackId) {
@@ -94,7 +93,7 @@ async function sleepingElsaDetected(elsaId) {
 async function rebootRequested(callbackId, userId) {
     const elsa = botState.tryRemoveByCallbackId(callbackId);
     if (elsa === undefined) {
-        return;
+        return await web.chat.postEphemeral(channelId, 'Unknown callbackId\n(It seems that elsabot has suffered a restart. Sorry about that.)', userId);
     }
     return await web.chat.update(elsa.messageTs, channelId, '', elsa.requestedNotification(userId));
 }
