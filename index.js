@@ -280,7 +280,7 @@ if (process.env.ELSABOT_STARTUP_MESSAGE) {
           {
             'color': '#2222aa',
             'title': `The bot is running in ${globalSupervised ? 'supervised' : 'automatic'} mode`,
-            'text': globalSupervised ? `I'll ask for confirmation before actually rebooting the host.` : `I'll try automatic reboot on discovering unresponsive host.`
+            'text': globalSupervised ? `I'll ask for confirmation before actually rebooting the host.` : `I'll try automatic reboot whenever I discover an unresponsive host.`
           }
         ]
       }).catch(reason => console.error(reason));
