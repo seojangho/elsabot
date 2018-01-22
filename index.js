@@ -87,6 +87,7 @@ class Host {
                         await messageCard.post();
                     }
                     await system(`ipmitool -I lanplus -H ${this.ipmiHost} -U elsabot -L OPERATOR -P ${this.ipmiPassword} power reset`);
+                    await system(`ipmitool -I lanplus -H ${this.ipmiHost} -U elsabot -L OPERATOR -P ${this.ipmiPassword} power on`);
                     setTimeout(() => this.transition(HostStatus.TESTING_REBOOT).catch(reason => console.error(reason)), pingConfig['reboot_wait'] * 1000);
                 } catch (e) {
                     console.error(e);
