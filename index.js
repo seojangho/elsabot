@@ -63,14 +63,15 @@ class Host {
                 break;
             }
             case HostStatus.DOWN: {
-                if (oldStatus === HostStatus.TESTING_REBOOT || oldStatus === HostStatus.WAITING_REBOOT) {
+                const recurred = oldStatus === HostStatus.TESTING_REBOOT || oldStatus === HostStatus.WAITING_REBOOT;
+                if (recurred) {
                     if (messageCard !== undefined) {
                         messageCard.dropToSupervised = !this.supervised && !globalSupervised;
                         await messageCard.post();
                     }
                     this.supervised = true;
                 }
-                const newCard = messageCards.addByHost(this);
+                const newCard = messageCards.addByHost(this, recurred);
                 if (this.supervised) {
                     await newCard.post();
                 } else {
@@ -103,10 +104,11 @@ class Host {
 }
 
 class MessageCard {
-    constructor(host) {
+    constructor(host, recurred) {
         this.host = host;
         this.callbackId = uuidv4();
         this.messageTs = null;
+        this.recurred = recurred;
 
         this.status = HostStatus.DOWN;
         this.rebootRequested = false;
@@ -117,7 +119,12 @@ class MessageCard {
     }
 
     get attachments() {
-        let text = `Not responding to ping for last ${pingConfig['loop_interval'] * pingConfig['num_trials_before_down']} seconds.`;
+        let text = '';
+        if (this.recurred) {
+            text += 'The host is still unresponsive.';
+        } else {
+            text += `Not responding to ping for last ${pingConfig['loop_interval'] * pingConfig['num_trials_before_down']} seconds.`;
+        }
         const actions = [];
         if (this.rebootRequested) {
             if (this.rebootRequestedBy !== null) {
@@ -177,8 +184,8 @@ class MessageCards {
         this.callbackIdMap = {};
     }
 
-    addByHost(host) {
-        const card = new MessageCard(host);
+    addByHost(host, recurred) {
+        const card = new MessageCard(host, recurred);
         this.hostIdMap[host.hostId] = card;
         this.callbackIdMap[card.callbackId] = card;
         return card;
