@@ -80,7 +80,14 @@ class Host {
                 break;
             }
             case HostStatus.WAITING_REBOOT: {
-                console.log(await system(`ipmitool -I lanplus -H ${this.ipmiHost} -U elsabot -L OPERATOR -P ${this.ipmiPassword} power status`));
+                try {
+                    console.log(await system(`ipmitool -I lanplus -H ${this.ipmiHost} -U elsabot -L OPERATOR -P ${this.ipmiPassword} power status`));
+                } catch (e) {
+                    console.error(e);
+                    if (messageCard !== undefined) {
+                        messageCard.hasIpmiError = true;
+                    }
+                }
                 setTimeout(() => this.transition(HostStatus.TESTING_REBOOT), pingConfig['reboot_wait'] * 1000);
                 if (messageCard !== undefined) {
                     await messageCard.post();
@@ -197,13 +204,7 @@ async function rebootRequested(callbackId, userId) {
     }
     card.rebootRequested = true;
     card.rebootRequestedBy = userId;
-    try {
-        await card.host.transition(HostStatus.WAITING_REBOOT);
-    } catch (e) {
-        console.error(e);
-        card.hasIpmiError = true;
-        await card.post();
-    }
+    await card.host.transition(HostStatus.WAITING_REBOOT);
 }
 
 async function globalHeartbeat() {
@@ -214,7 +215,7 @@ async function globalHeartbeat() {
     for (const promise of promises) {
         await promise;
     }
-    setTimeout(globalHeartbeat, pingConfig['loop_interval'] * 1000);
+    setTimeout(() => globalHeartbeat().catch(reason => console.error(reason)), pingConfig['loop_interval'] * 1000);
 }
 
 function system(command) {
@@ -245,10 +246,10 @@ for (const hostEntry of config['host']) {
     hostList.push(new Host(hostEntry['id'], hostEntry['ping_host'], hostEntry['ipmi_host'], hostEntry['ipmi_password']));
 }
 
-listener.action({}, payload => rebootRequested(payload.callback_id, payload.user.id));
+listener.action({}, payload => rebootRequested(payload.callback_id, payload.user.id).catch(reason => console.error(reason)));
 
 listener.start(slackConfig['port']).then(() => {
     console.log(`Listening on ${slackConfig['port']}`);
 });
 
-globalHeartbeat();
+globalHeartbeat().catch(reason => console.error(reason));
