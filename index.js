@@ -5,8 +5,9 @@ const uuidv4 = require('uuid/v4');
 const CALLBACK_ID = 'reboot';
 
 class SleepingElsa {
-    constructor(elsaId) {
+    constructor(elsaId, callbackId) {
         this.elsaId = elsaId;
+        this.callbackId = callbackId;
         this.messageTs = null;
     }
 
@@ -27,20 +28,20 @@ class SleepingElsa {
                     'text': 'Force Reboot',
                     'type': 'button'
                 }],
-                'callback_id': CALLBACK_ID
+                'callback_id': this.callbackId
               }
             ]
           }
     }
 
-    requestedNotification(username) {
+    requestedNotification(userId) {
         return {
             attachments: [
               {
                 'color': '#aaaaaa',
                 'title': `${this.elsaIdentifier} is sleeping`,
-                'text': 'SSH is not responsive for last 2 minutes.' + `\n:white_check_mark: @${username} knocks the door!`,
-                'callback_id': CALLBACK_ID
+                'text': 'SSH is not responsive for last 2 minutes.' + `\n:white_check_mark: <@${userId}> knocks the door!`,
+                'callback_id': this.callbackId
               }
             ]
           }
@@ -87,7 +88,7 @@ async function sleepingElsaDetected(elsaId) {
     if (elsa === undefined) {
         return;
     }
-    return await web.chat.postMessage(channelId, '', elsa.sleepNotification);
+    return await web.chat.postMessage(channelId, '', elsa.sleepNotification).then(response => console.log(response));
 }
 
 async function rebootRequested(callbackId, username) {
