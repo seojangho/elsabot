@@ -29,9 +29,7 @@ class Host {
             return;
         }
         try {
-            console.log(`ping...`);
             await system(`ping -c${pingConfig['count']} -w${pingConfig['deadline']} ${this.pingHost}`);
-            console.log(`ping...ok`);
             this.pingFailures = 0;
             await this.transition(HostStatus.NORMAL);
         } catch (e) {
@@ -84,15 +82,16 @@ class Host {
             case HostStatus.WAITING_REBOOT: {
                 try {
                     console.log(await system(`ipmitool -I lanplus -H ${this.ipmiHost} -U elsabot -L OPERATOR -P ${this.ipmiPassword} power status`));
+                    setTimeout(() => this.transition(HostStatus.TESTING_REBOOT), pingConfig['reboot_wait'] * 1000);
+                    if (messageCard !== undefined) {
+                        await messageCard.post();
+                    }
                 } catch (e) {
                     console.error(e);
                     if (messageCard !== undefined) {
                         messageCard.hasIpmiError = true;
                     }
-                }
-                setTimeout(() => this.transition(HostStatus.TESTING_REBOOT), pingConfig['reboot_wait'] * 1000);
-                if (messageCard !== undefined) {
-                    await messageCard.post();
+                    await this.transition(HostSTatus.DOWN);
                 }
                 break;
             }
