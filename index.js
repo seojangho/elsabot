@@ -22,6 +22,7 @@ class Host {
         this.supervised = globalSupervised;
         this.status = HostStatus.UNKNOWN;
         this.pingFailures = 0;
+        this.timeout = null;
     }
 
     async heartbeat() {
@@ -47,6 +48,10 @@ class Host {
         }
         this.status = newStatus;
         this.pingFailures = 0;
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
         const messageCard = messageCards.tryGetByHostId(this.hostId);
         if (messageCard !== undefined) {
             messageCard.status = newStatus;
@@ -88,10 +93,9 @@ class Host {
                     }
                     await system(`ipmitool -I lanplus -H ${this.ipmiHost} -U elsabot -L OPERATOR -P ${this.ipmiPassword} power reset`);
                     await system(`ipmitool -I lanplus -H ${this.ipmiHost} -U elsabot -L OPERATOR -P ${this.ipmiPassword} power on`);
-                    setTimeout(() => {
-                        if (this.status === HostStatus.WAITING_REBOOT) {
-                            this.transition(HostStatus.TESTING_REBOOT).catch(reason => console.error(reason));
-                        }
+                    this.timeout = setTimeout(() => {
+                        this.timeout = null;
+                        this.transition(HostStatus.TESTING_REBOOT).catch(reason => console.error(reason));
                     }, pingConfig['reboot_wait'] * 1000);
                 } catch (e) {
                     console.error(e);
