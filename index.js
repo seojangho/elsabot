@@ -121,7 +121,7 @@ class MessageCard {
     get attachments() {
         let text = '';
         if (this.recurred) {
-            text += 'The host is still unresponsive.';
+            text += 'This host is still unresponsive.';
         } else {
             text += `Not responding to ping for last ${pingConfig['loop_interval'] * pingConfig['num_trials_before_down']} seconds.`;
         }
@@ -147,7 +147,7 @@ class MessageCard {
             text += `\n:white_check_mark: She's back!`;
         }
         if (this.rebootRequested && this.status === HostStatus.DOWN) {
-            text += `\n:x: She's not coming back... sorry about that.`;
+            text += `\n:x: Failed to reboot... sorry about that.`;
         }
         if (this.dropToSupervised) {
             text += `\n:x: Dropping to supervised mode for this host.`
@@ -158,7 +158,7 @@ class MessageCard {
         return {
             attachments: [
               {
-                'color': '#aaaaaa',
+                'color': '#2222aa',
                 'title': `${this.host.hostId} is sleeping`,
                 'text': text,
                 'actions': actions,
@@ -261,3 +261,19 @@ listener.start(slackConfig['port']).then(() => {
 });
 
 globalHeartbeat().catch(reason => console.error(reason));
+
+web.chat.postMessage(channelId, '', {
+    attachments: [
+      {
+        'title': `Hi, there! Elsabot is up and running!`,
+        'color': '#2222aa',
+        'text': `The following hosts are covered: \n` + hostList.map(host => `• ${host.hostId} (ping \`${host.pingHost}\`, IPMI \`${host.ipmiHost}\`)`).join('\n'),
+        'mrkdwn': true
+      },
+      {
+        'color': '#2222aa',
+        'title': `The bot is running in ${globalSupervised ? 'supervised' : 'automatic'} mode`,
+        'text': globalSupervised ? `I'll ask for confirmation before actually rebooting the host.` : `I'll try automatic reboot on discovering unresponsive host.`
+      }
+    ]
+  }).catch(reason => console.error(reason));
