@@ -25,7 +25,6 @@ class Host {
     }
 
     async heartbeat() {
-        console.log(`${this.hostId} beats!`);
         if (this.status === HostStatus.WAITING_REBOOT) {
             return;
         }
@@ -34,6 +33,7 @@ class Host {
             this.pingFailures = 0;
             await this.transition(HostStatus.NORMAL);
         } catch (e) {
+            console.error(e);
             this.pingFailures++;
             if (this.pingFailures === pingConfig['num_trials_before_down']) {
                 await this.transition(HostStatus.DOWN);
@@ -43,7 +43,6 @@ class Host {
 
     async transition(newStatus) {
         const oldStatus = this.status;
-        console.log(`${this.hostId} ${oldStatus} -> ${newStatus}`);
         if (oldStatus === newStatus) {
             return;
         }
