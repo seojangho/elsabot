@@ -84,7 +84,7 @@ http.createServer((req, res) => {
     req.on('data', chunk => body.push(chunk));
     req.on('end', () => {
         const data = Buffer.concat(body).toString();
-        console.log(data);
+        console.log(JSON.parse(data));
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/plain');
         res.end('\n');
