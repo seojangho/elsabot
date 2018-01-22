@@ -91,7 +91,7 @@ class Host {
                     if (messageCard !== undefined) {
                         messageCard.hasIpmiError = true;
                     }
-                    await this.transition(HostSTatus.DOWN);
+                    await this.transition(HostStatus.DOWN);
                 }
                 break;
             }
