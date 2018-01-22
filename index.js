@@ -46,6 +46,7 @@ class Host {
             return;
         }
         this.status = newStatus;
+        this.pingFailures = 0;
         const messageCard = messageCards.tryGetByHostId(this.hostId);
         if (messageCard !== undefined) {
             messageCard.status = newStatus;
@@ -83,7 +84,7 @@ class Host {
             case HostStatus.WAITING_REBOOT: {
                 try {
                     console.log(await system(`ipmitool -I lanplus -H ${this.ipmiHost} -U elsabot -L OPERATOR -P ${this.ipmiPassword} power status`));
-                    setTimeout(() => this.transition(HostStatus.TESTING_REBOOT), pingConfig['reboot_wait'] * 1000);
+                    setTimeout(() => this.transition(HostStatus.TESTING_REBOOT).catch(reason => console.error(reason)), pingConfig['reboot_wait'] * 1000);
                     if (messageCard !== undefined) {
                         await messageCard.post();
                     }
