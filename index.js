@@ -1,4 +1,4 @@
-const WebClient = require('@slack/client');
+const { WebClient } = require('@slack/client');
 const EventsApi = require('@slack/events-api');
 const uuidv4 = require('uuid/v4');
 
