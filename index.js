@@ -29,7 +29,9 @@ class Host {
             return;
         }
         try {
+            console.log(`ping...`);
             await system(`ping -c${pingConfig['count']} -w${pingConfig['deadline']} ${this.pingHost}`);
+            console.log(`ping...ok`);
             this.pingFailures = 0;
             await this.transition(HostStatus.NORMAL);
         } catch (e) {
