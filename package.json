@@ -6,6 +6,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "@slack/client": "^3.15.0",
+    "@slack/events-api": "^1.0.1",
     "uuid": "^3.2.1"
   }
 }
