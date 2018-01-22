@@ -132,11 +132,11 @@ class MessageCard {
                 'type': 'button'
             });
         }
-        if (this.status === HostStatus.NORMAL) {
-            text += `\n:white_check_mark: She's back!`;
-        }
         if (this.hasIpmiError) {
             text += '\n:x: An error occurred while issuing IPMI command.';
+        }
+        if (this.status === HostStatus.NORMAL) {
+            text += `\n:white_check_mark: She's back!`;
         }
         if (this.rebootRequested && this.status === HostStatus.DOWN) {
             text += `\n:x: She's not coming back... sorry about that.`;
