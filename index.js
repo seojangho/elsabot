@@ -33,7 +33,6 @@ class Host {
             this.pingFailures = 0;
             await this.transition(HostStatus.NORMAL);
         } catch (e) {
-            console.error(e);
             this.pingFailures++;
             if (this.pingFailures === pingConfig['num_trials_before_down']) {
                 await this.transition(HostStatus.DOWN);
