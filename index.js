@@ -1,7 +1,7 @@
 const { WebClient } = require('@slack/client');
 const { createMessageAdapter } = require('@slack/interactive-messages');
 const uuidv4 = require('uuid/v4');
-
+const fs = require('fs');
 
 class SleepingElsa {
     constructor(elsaId, callbackId) {
@@ -74,10 +74,12 @@ class BotState {
     }
 }
 
-const token = process.env.SLACK_TOKEN;
-const channelId = process.env.SLACK_CHANNEL;
-const verificationToken = process.env.SLACK_VERIFICATION_TOKEN;
-const port = process.env.PORT;
+const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+const token = config['slack']['token'];
+const channelId = config['slack']['channel'];
+const verificationToken = config['slack']['verification_token'];
+const port = config['slack']['port'];
+const elsaList = config['elsa'];
 const botState = new BotState();
 const web = new WebClient(token);
 const listener = createMessageAdapter(verificationToken);
