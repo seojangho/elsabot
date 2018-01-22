@@ -1,5 +1,5 @@
 const { WebClient } = require('@slack/client');
-const EventsApi = require('@slack/events-api');
+const { createMessageAdapter } = require('@slack/interactive-messages');
 const uuidv4 = require('uuid/v4');
 
 class SleepingElsa {
@@ -79,7 +79,7 @@ const verificationToken = process.env.SLACK_VERIFICATION_TOKEN;
 const port = process.env.PORT;
 const botState = new BotState();
 const web = new WebClient(token);
-const listener = new EventsApi.createSlackEventAdapter(verificationToken);
+const listener = createMessageAdapter(verificationToken);
 
 async function sleepingElsaDetected(elsaId) {
     const elsa = botState.tryAddByElsaId(elsaId);
@@ -96,11 +96,7 @@ async function rebootRequested(callbackId, username) {
     }
 }
 
-listener.on('message', event => 
-    console.log(`Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`)
-);
-
-listener.on('error', console.error);
+listener.action({}, payload => console.log);
 
 listener.start(port).then(() => {
     console.log(`Listening on ${port}`);
