@@ -103,7 +103,7 @@ async function rebootRequested(callbackId, userId) {
         await web.chat.update(elsa.messageTs, channelId, '', elsa.requestedNotification(userId));
     } catch (e) {
         console.error(e);
-        await web.chat.postEphemeral(channelId, 'Unknown error. Sorry about that.', userId);
+        await web.chat.postEphemeral(channelId, `Unknown error while rebooting ${elsa.elsaId} to process callback ${callbackId}. Sorry about that.`, userId);
     }
 }
 
