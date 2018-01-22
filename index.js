@@ -92,7 +92,7 @@ async function sleepingElsaDetected(elsaId) {
 
 async function rebootRequested(callbackId, username) {
     const elsa = botState.tryRemoveByCallbackId(callbackId);
-    if (elsa == undefined) {
+    if (elsa === undefined) {
         return;
     }
 }
