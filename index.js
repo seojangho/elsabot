@@ -277,12 +277,12 @@ listener.start(slackConfig['port']).then(() => {
 globalHeartbeat().catch(reason => console.error(reason));
 
 if (process.env.ELSABOT_STARTUP_MESSAGE) {
-    web.chat.postMessage(channelId, '', {
+    web.chat.postMessage(channelId, 'Hi, there! Elsabot is up and running!', {
         attachments: [
           {
-            'title': `Hi, there! Elsabot is up and running!`,
             'color': '#2222aa',
-            'text': `The following hosts are covered: \n` + hostList.map(host => `• ${host.hostId} (ping ${host.pingHost}, IPMI ${host.ipmiHost})`).join('\n'),
+            'title': 'The following hosts are covered:',
+            'text': hostList.map(host => `• ${host.hostId} (ping ${host.pingHost}, IPMI ${host.ipmiHost})`).join('\n'),
             'mrkdwn': true
           },
           {
