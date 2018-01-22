@@ -120,7 +120,7 @@ class MessageCard {
         const actions = [];
         if (this.rebootRequested) {
             if (this.rebootRequestedBy !== null) {
-                text += `\n:white_check_mark: <@${userId}> knocks the door!`;
+                text += `\n:white_check_mark: <@${this.rebootRequestedBy}> knocks the door!`;
             } else {
                 text += `\n:white_check_mark: Rebooting automatically...`;
             }
