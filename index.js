@@ -2,10 +2,11 @@ const { WebClient } = require('@slack/client');
 const { createMessageAdapter } = require('@slack/interactive-messages');
 const uuidv4 = require('uuid/v4');
 
+const CALLBACK_ID = 'reboot';
+
 class SleepingElsa {
-    constructor(elsaId, callbackId) {
+    constructor(elsaId) {
         this.elsaId = elsaId;
-        this.callbackId = callbackId;
         this.messageTs = null;
     }
 
@@ -26,7 +27,7 @@ class SleepingElsa {
                     'text': 'Force Reboot',
                     'type': 'button'
                 }],
-                'callback_id': this.callbackId
+                'callback_id': CALLBACK_ID
               }
             ]
           }
@@ -39,7 +40,7 @@ class SleepingElsa {
                 'color': '#aaaaaa',
                 'title': `${this.elsaIdentifier} is sleeping`,
                 'text': 'SSH is not responsive for last 2 minutes.' + `\n:white_check_mark: @${username} knocks the door!`,
-                'callback_id': this.callbackId
+                'callback_id': CALLBACK_ID
               }
             ]
           }
@@ -96,7 +97,7 @@ async function rebootRequested(callbackId, username) {
     }
 }
 
-listener.action({}, payload => console.log);
+listener.action(CALLBACK_ID, payload => console.log);
 
 listener.start(port).then(() => {
     console.log(`Listening on ${port}`);
