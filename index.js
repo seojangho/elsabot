@@ -109,7 +109,7 @@ class MessageCard {
     }
 
     get attachments() {
-        let text = `Not responding to ping for last ${pingConfig['loop_intervals'] * pingConfig['num_trials_before_down']} seconds.`;
+        let text = `Not responding to ping for last ${pingConfig['loop_interval'] * pingConfig['num_trials_before_down']} seconds.`;
         const actions = [];
         if (this.rebootRequested) {
             if (this.rebootRequestedBy !== null) {
@@ -154,7 +154,7 @@ class MessageCard {
     }
 
     post() {
-        if (this.messageTs !== null) {
+        if (this.messageTs === null) {
             return web.chat.postMessage(channelId, '', this.attachments)
                 .then(response => { this.messageTs = response.ts; return response; })
         } else {
@@ -242,7 +242,7 @@ const web = new WebClient(slackConfig['token']);
 const listener = createMessageAdapter(slackConfig['verification_token']);
 
 for (const elsaEntry of config['elsa']) {
-    elsaList.push(new Elsa(elsaEntry['id', elsaEntry['ping_host'], elsaEntry['ipmi_host'], elsaEntry['ipmi_password']]));
+    elsaList.push(new Elsa(elsaEntry['id'], elsaEntry['ping_host'], elsaEntry['ipmi_host'], elsaEntry['ipmi_password']));
 }
 
 listener.action({}, payload => rebootRequested(payload.callback_id, payload.user.id));
