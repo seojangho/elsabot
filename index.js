@@ -25,14 +25,14 @@ class Host {
     }
 
     async heartbeat() {
-        if (this.status === HostStatus.WAITING_REBOOT) {
-            return;
-        }
         try {
             await system(`ping -c${pingConfig['count']} -w${pingConfig['deadline']} ${this.pingHost}`);
             this.pingFailures = 0;
             await this.transition(HostStatus.NORMAL);
         } catch (e) {
+            if (this.status === HostStatus.WAITING_REBOOT) {
+                return;
+            }
             this.pingFailures++;
             if (this.pingFailures === pingConfig['num_trials_before_down']) {
                 await this.transition(HostStatus.DOWN);
@@ -83,11 +83,11 @@ class Host {
             }
             case HostStatus.WAITING_REBOOT: {
                 try {
-                    await system(`ipmitool -I lanplus -H ${this.ipmiHost} -U elsabot -L OPERATOR -P ${this.ipmiPassword} power reset`);
-                    setTimeout(() => this.transition(HostStatus.TESTING_REBOOT).catch(reason => console.error(reason)), pingConfig['reboot_wait'] * 1000);
                     if (messageCard !== undefined) {
                         await messageCard.post();
                     }
+                    await system(`ipmitool -I lanplus -H ${this.ipmiHost} -U elsabot -L OPERATOR -P ${this.ipmiPassword} power reset`);
+                    setTimeout(() => this.transition(HostStatus.TESTING_REBOOT).catch(reason => console.error(reason)), pingConfig['reboot_wait'] * 1000);
                 } catch (e) {
                     console.error(e);
                     if (messageCard !== undefined) {
