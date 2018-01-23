@@ -232,7 +232,6 @@ async function rebootRequested(callbackId, userId) {
 
 async function globalHeartbeat() {
     while (true) {
-        console.log(new Date().toISOString());
         const next = Date.now() + pingConfig['loop_period'] * 1000;
         promises = [];
         for (const host of hostList) {
