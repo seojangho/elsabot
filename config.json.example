@@ -3,7 +3,7 @@
     "supervised": true,
     "ping": {
         "count": 1,
-        "deadline": 9,
+        "deadline": 5,
         "loop_period": 10,
         "num_trials_before_down": 3,
         "reboot_wait": 300
