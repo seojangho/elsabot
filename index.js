@@ -3,6 +3,7 @@ const { createMessageAdapter } = require('@slack/interactive-messages');
 const uuidv4 = require('uuid/v4');
 const { readFileSync } = require('fs');
 const { exec } = require('child_process');
+const { createServer } = require('http');
 
 const HostStatus = {
     UNKNOWN: 0,
@@ -288,7 +289,7 @@ listener.start(slackConfig['port']).then(() => {
 
 globalHeartbeat().catch(reason => console.error(reason));
 
-if (process.env.ELSABOT_STARTUP_MESSAGE) {
+createServer((req, res) => {
     web.chat.postMessage(channelId, 'Hi, there! Elsabot is up and running!', {
         attachments: [
           {
@@ -303,5 +304,8 @@ if (process.env.ELSABOT_STARTUP_MESSAGE) {
             'text': globalSupervised ? `I'll ask for confirmation before actually rebooting the host.` : `I'll try automatic reboot whenever I discover an unresponsive host.`
           }
         ]
-      }).catch(reason => console.error(reason));
-}
+    }).catch(reason => console.error(reason));
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+    res.end('Sending hello message...\n');
+}).listen(config['management_port'], '127.0.0.1', () => console.log(`management port: ${config['management_port']}`));
