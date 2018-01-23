@@ -34,6 +34,7 @@ class Host {
             if (this.status === HostStatus.WAITING_REBOOT) {
                 return;
             }
+            console.error(e);
             this.pingFailures++;
             if (this.pingFailures === pingConfig['num_trials_before_down']) {
                 await this.transition(HostStatus.DOWN);
@@ -230,6 +231,7 @@ async function rebootRequested(callbackId, userId) {
 }
 
 async function globalHeartbeat() {
+    console.log(new Date().toISOString());
     promises = [];
     for (const host of hostList) {
         promises.push(host.heartbeat());
