@@ -134,7 +134,7 @@ class MessageCard {
         if (this.recurred) {
             text += 'This host is still unresponsive.';
         } else {
-            text += `Not responding to ping for last ${pingConfig['loop_interval'] * pingConfig['num_trials_before_down']} seconds.`;
+            text += `Not responding to ping for last ${pingConfig['loop_period'] * pingConfig['num_trials_before_down']} seconds.`;
         }
         const actions = [];
         if (this.rebootRequested) {
@@ -231,15 +231,22 @@ async function rebootRequested(callbackId, userId) {
 }
 
 async function globalHeartbeat() {
-    console.log(new Date().toISOString());
-    promises = [];
-    for (const host of hostList) {
-        promises.push(host.heartbeat());
+    while (true) {
+        console.log(new Date().toISOString());
+        const next = Date.now() + pingConfig['loop_period'] * 1000;
+        promises = [];
+        for (const host of hostList) {
+            promises.push(host.heartbeat());
+        }
+        for (const promise of promises) {
+            await promise;
+        }
+        const wait = next - Date.now();
+        if (wait > 0) {
+            setTimeout(() => globalHeartbeat().catch(reason => console.error(reason)), wait);
+            break;
+        }
     }
-    for (const promise of promises) {
-        await promise;
-    }
-    setTimeout(() => globalHeartbeat().catch(reason => console.error(reason)), pingConfig['loop_interval'] * 1000);
 }
 
 function system(command) {

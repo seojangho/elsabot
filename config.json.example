@@ -4,7 +4,7 @@
     "ping": {
         "count": 1,
         "deadline": 9,
-        "loop_interval": 10,
+        "loop_period": 10,
         "num_trials_before_down": 3,
         "reboot_wait": 300
     },
