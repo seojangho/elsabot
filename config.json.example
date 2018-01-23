@@ -1,9 +1,9 @@
 {
-    "command_prefix": "ssh -p50022 mango.jangho.io -- ",
+    "command_prefix": "ssh -o ConnectTimeout=3 cmscluster.snu.ac.kr -- ",
     "supervised": true,
     "ping": {
         "count": 1,
-        "deadline": 5,
+        "deadline": 3,
         "loop_period": 10,
         "num_trials_before_down": 3,
         "reboot_wait": 300
@@ -15,6 +15,12 @@
         "port": 50000
     },
     "host": [
+        {
+            "id": "Elsabot Gateway",
+            "ping_host": "cmscluster.snu.ac.kr",
+            "ipmi_host": null,
+            "ipmi_password": null
+        },
         {
             "id": "Elsa-04",
             "ping_host": "147.46.216.181",

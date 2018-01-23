@@ -79,7 +79,7 @@ class Host {
                     this.supervised = true;
                 }
                 const newCard = messageCards.addByHost(this, recurred);
-                if (this.supervised) {
+                if (this.supervised || this.ipmiHost === null) {
                     await newCard.post();
                 } else {
                     newCard.rebootRequested = true;
@@ -143,7 +143,7 @@ class MessageCard {
             } else {
                 text += `\n:white_check_mark: Rebooting automatically...`;
             }
-        } else if (this.status === HostStatus.DOWN) {
+        } else if (this.status === HostStatus.DOWN && this.host.ipmiHost) {
             actions.push({
                 'name': 'reset',
                 'value': 'reset',
@@ -155,7 +155,7 @@ class MessageCard {
             text += '\n:x: An error occurred while issuing IPMI command.';
         }
         if (this.status === HostStatus.NORMAL) {
-            text += `\n:white_check_mark: She's back!`;
+            text += `\n:white_check_mark: Back online!`;
         }
         if (this.rebootRequested && this.status === HostStatus.DOWN) {
             text += `\n:x: Failed to reboot... sorry about that.`;
