@@ -1,11 +1,12 @@
 const https = require('https');
 const { stringify } = require('querystring');
 const { parse, serialize } = require('cookie');
+const { spawn } = require('child_process');
 
 class ConsolePreview {
-    constructor(timeStamp, bmp) {
+    constructor(timeStamp, png) {
         this.timeStamp = timeStamp;
-        this.bmp = bmp;
+        this.png = png;
     }
 }
 
@@ -67,7 +68,26 @@ async function preview(host, username, password) {
     if (response.statusCode !== 200) {
         throw new Error(`StatusCode is ${response.statusCode}`);
     }
-    return new ConsolePreview(timeStamp, response.body);
+    const png = await bmpToPng(response.body);
+    return new ConsolePreview(timeStamp, png);
+}
+
+function bmpToPng(bmp) {
+    return new Promise((resolve, reject) => {
+        const png = [];
+        const convert = spawn('convert', ['-', 'png:-']);
+        convert.stdout.on('data', chunk => png.push(chunk));
+        convert.on('close', code => {
+            if (code == 0) {
+                resolve(Buffer.concat(png));
+            } else {
+                reject(`Imagemgaick StatusCode is ${code}`);
+            }
+        });
+        convert.on('error', error => reject(error));
+        convert.stdin.write(bmp);
+        convert.stdin.end();
+    });
 }
 
 async function login(host, username, password) {
@@ -93,3 +113,6 @@ function sleep(ms) {
         setTimeout(() => resolve(), ms);
     });
 }
+
+// const fs = require('fs');
+// preview('147.46.215.217', 'admin', '').then(x => fs.writeFile('./x', x.png, (err) => console.log(err))).catch(x => console.error(x));
