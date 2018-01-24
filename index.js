@@ -223,7 +223,7 @@ class MessageCard {
                 'image_url': `${previewConfig['basepath']}/preview/${this.callbackId}/${this.consolePreview.timeStamp}/preview.png`,
                 'ts': Math.floor(this.consolePreview.timeStamp.getTime()/1000)
             });
-            console.log(`${previewConfig['basepath']}/preview/${this.callbackId}/${this.consolePreview.timeStamp}/preview.png`);
+            console.log(`${previewConfig['basepath']}preview${this.callbackId}/${this.consolePreview.timeStamp.getTime()}/preview.png`);
         }
         return {attachments: attachments};
     }
@@ -367,7 +367,7 @@ createServer((req, res) => {
 }).listen(config['management_port'], '127.0.0.1', () => console.log(`management port: ${config['management_port']}`));
 
 const previewServer = new Koa();
-previewServer.use(koaRoute.get('/preview/:callbackId/:timestamp/preview.png'), (ctx, callbackId, timestamp) => {
+previewServer.use(koaRoute.get('/preview/:callbackId/:timestamp/preview.png', (ctx, callbackId, timestamp) => {
     const card = messageCards.tryGetByCallbackId(callbackId);
     if (card === undefined) {
         ctx.status = 404;
@@ -379,7 +379,7 @@ previewServer.use(koaRoute.get('/preview/:callbackId/:timestamp/preview.png'), (
     }
     ctx.type = 'image/png';
     ctx.body = card.consolePreview.png;
-});
+}));
 previewServer.listen(previewConfig['port']);
 
 exports.system = system;
