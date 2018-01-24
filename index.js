@@ -220,10 +220,9 @@ class MessageCard {
             attachments.push({
                 'text': 'Console Preview',
                 'color': '#555555',
-                'image_url': `${previewConfig['basepath']}/preview/${this.callbackId}/${this.consolePreview.timeStamp}/preview.png`,
+                'image_url': `${previewConfig['basepath']}preview/${this.callbackId}/${this.consolePreview.timeStamp}/preview.png`,
                 'ts': Math.floor(this.consolePreview.timeStamp.getTime()/1000)
             });
-            console.log(`${previewConfig['basepath']}preview${this.callbackId}/${this.consolePreview.timeStamp.getTime()}/preview.png`);
         }
         return {attachments: attachments};
     }
