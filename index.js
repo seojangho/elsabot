@@ -83,7 +83,7 @@ class Host {
         this.status = newStatus;
         const newConsolePreviewNeeded = this.consolePreviewNeeded;
         if (!oldConsolePreviewNeeded && newConsolePreviewNeeded) {
-            consolePreviewUpdate(host).catch(error => console.error(error));
+            consolePreviewUpdate(this).catch(error => console.error(error));
         }
         this.pingFailures = 0;
         if (this.timeout) {
