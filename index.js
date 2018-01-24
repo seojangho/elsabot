@@ -36,16 +36,41 @@ class Host {
         try {
             await system(`ping -c${pingConfig['count']} -w${pingConfig['deadline']} ${this.pingHost}`);
             this.pingFailures = 0;
-            await this.transition(HostStatus.NORMAL);
+            await this.post(await this.transition(HostStatus.NORMAL));
         } catch (e) {
             if (this.status === HostStatus.WAITING_REBOOT) {
+                await this.post(false);
                 return;
             }
             console.error(e);
             this.pingFailures++;
             if (this.pingFailures === pingConfig['num_trials_before_down']) {
-                await this.transition(HostStatus.DOWN);
+                await this.post(await this.transition(HostStatus.DOWN));
+            } else {
+                await this.post(false);
             }
+        }
+    }
+
+    async post(forced) {
+        let willPost = forced;
+        const messageCard = messageCards.tryGetByHostId(this.hostId);
+        if (messageCard === undefined) {
+            return;
+        }
+        if (this.consolePreviewNeeded) {
+            if (messageCard.consolePreview !== this.consolePreview) {
+                messageCard.consolePreview = this.consolePreview;
+                willPost = true;
+            }
+        } else {
+            if (messageCard.consolePreview) {
+                messageCard.consolePreview = null;
+                willPost = true;
+            }
+        }
+        if (willPost) {
+            await messageCard.post();
         }
     }
 
@@ -53,7 +78,7 @@ class Host {
         const oldStatus = this.status;
         const oldConsolePreviewNeeded = this.consolePreviewNeeded;
         if (oldStatus === newStatus) {
-            return;
+            return false;
         }
         this.status = newStatus;
         const newConsolePreviewNeeded = this.consolePreviewNeeded;
@@ -71,33 +96,32 @@ class Host {
         }
         switch (newStatus) {
             case HostStatus.TESTING_REBOOT: {
-                break;
+                return false;
             }
             case HostStatus.NORMAL: {
                 if (messageCard !== undefined) {
                     messageCard.recoverToAutomatic = this.supervised && !globalSupervised;
-                    await messageCard.post();
                 }
                 this.supervised = globalSupervised;
-                break;
+                return true;
             }
             case HostStatus.DOWN: {
                 const recurred = oldStatus === HostStatus.TESTING_REBOOT || oldStatus === HostStatus.WAITING_REBOOT;
                 if (recurred) {
                     if (messageCard !== undefined) {
                         messageCard.dropToSupervised = !this.supervised && !globalSupervised;
+                        messageCard.consolePreview = null;
                         await messageCard.post();
                     }
                     this.supervised = true;
                 }
                 const newCard = messageCards.addByHost(this, recurred);
                 if (this.supervised || this.ipmiHost === null) {
-                    await newCard.post();
+                    return true;
                 } else {
                     newCard.rebootRequested = true;
-                    await this.transition(HostStatus.WAITING_REBOOT);
+                    return await this.transition(HostStatus.WAITING_REBOOT);
                 }
-                break;
             }
             case HostStatus.WAITING_REBOOT: {
                 try {
@@ -110,14 +134,14 @@ class Host {
                         this.timeout = null;
                         this.transition(HostStatus.TESTING_REBOOT).catch(reason => console.error(reason));
                     }, pingConfig['reboot_wait'] * 1000);
+                    return false;
                 } catch (e) {
                     console.error(e);
                     if (messageCard !== undefined) {
                         messageCard.hasIpmiError = true;
                     }
-                    await this.transition(HostStatus.DOWN);
+                    return await this.transition(HostStatus.DOWN);
                 }
-                break;
             }
             default: {
                 throw new Error(`Unallowed newStatus: ${newStatus}`);
@@ -139,6 +163,7 @@ class MessageCard {
         this.hasIpmiError = false;
         this.dropToSupervised = false;
         this.recoverToAutomatic = false;
+        this.consolePreview = null;
     }
 
     get attachments() {
@@ -243,7 +268,7 @@ async function rebootRequested(callbackId, userId) {
     }
     card.rebootRequested = true;
     card.rebootRequestedBy = userId;
-    await card.host.transition(HostStatus.WAITING_REBOOT);
+    await card.host.post(await card.host.transition(HostStatus.WAITING_REBOOT));
 }
 
 async function globalHeartbeat() {
