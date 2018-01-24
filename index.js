@@ -144,6 +144,7 @@ class MessageCard {
             } else {
                 text += `\n:white_check_mark: Rebooting automatically...`;
             }
+            text += ` (Sending IPMI reset command)`;
         } else if (this.status === HostStatus.DOWN && this.host.ipmiHost) {
             actions.push({
                 'name': 'reset',
@@ -155,8 +156,11 @@ class MessageCard {
         if (this.hasIpmiError) {
             text += '\n:x: An error occurred while issuing IPMI command.';
         }
+        if (this.status === HostStatus.WAITING_REBOOT || this.status === HostStatus.TESTING_REBOOT) {
+            text += '\n:arrows_counterclockwise: Checking reachability...';
+        }
         if (this.status === HostStatus.NORMAL) {
-            text += `\n:white_check_mark: Back online!`;
+            text += `\n:white_check_mark: She's back!`;
         }
         if (this.rebootRequested && this.status === HostStatus.DOWN) {
             text += `\n:x: Failed to reboot... sorry about that.`;
