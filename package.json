@@ -8,6 +8,7 @@
     "@slack/client": "^3.15.0",
     "@slack/interactive-messages": "^0.2.0",
     "body-parser": "^1.18.2",
+    "cookie": "^0.3.1",
     "express": "^4.16.2",
     "uuid": "^3.2.1"
   }
