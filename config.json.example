@@ -1,4 +1,8 @@
 {
+    "preview": {
+        "port": 50003,
+        "basepath": "https://cmsbuild.snu.ac.kr:50004/"
+    },
     "management_port": 50002,
     "supervised": true,
     "ping": {

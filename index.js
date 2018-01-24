@@ -5,6 +5,8 @@ const { readFileSync } = require('fs');
 const { exec } = require('child_process');
 const { createServer } = require('http');
 const { preview } = require('./preview');
+const Koa = require('koa');
+const koaRoute = require('koa-route');
 
 const HostStatus = {
     UNKNOWN: 0,
@@ -218,9 +220,10 @@ class MessageCard {
             attachments.push({
                 'text': 'Console Preview',
                 'color': '#555555',
-                'image_url': 'http://via.placeholder.com/350x150',
+                'image_url': `${previewConfig['basepath']}/preview/${this.callbackId}/${this.consolePreview.timeStamp}/preview.png`,
                 'ts': Math.floor(this.consolePreview.timeStamp.getTime()/1000)
             });
+            console.log(`${previewConfig['basepath']}/preview/${this.callbackId}/${this.consolePreview.timeStamp}/preview.png`);
         }
         return {attachments: attachments};
     }
@@ -323,6 +326,7 @@ const slackConfig = config['slack'];
 const channelId = slackConfig['channel'];
 const globalSupervised = config['supervised'];
 const pingConfig = config['ping'];
+const previewConfig = config['preview'];
 
 const messageCards = new MessageCards();
 const hostList = [];
@@ -361,5 +365,21 @@ createServer((req, res) => {
     res.setHeader('Content-Type', 'text/plain');
     res.end('Sending hello message...\n');
 }).listen(config['management_port'], '127.0.0.1', () => console.log(`management port: ${config['management_port']}`));
+
+const previewServer = new Koa();
+previewServer.use(koaRoute.get('/preview/:callbackId/:timestamp/preview.png'), (ctx, callbackId, timestamp) => {
+    const card = messageCards.tryGetByCallbackId(callbackId);
+    if (card === undefined) {
+        ctx.status = 404;
+        return;
+    }
+    if (card.consolePreview == null) {
+        ctx.status = 404;
+        return;
+    }
+    ctx.type = 'image/png';
+    ctx.body = card.consolePreview.png;
+});
+previewServer.listen(previewConfig['port']);
 
 exports.system = system;
