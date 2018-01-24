@@ -2,6 +2,13 @@ const https = require('https');
 const { stringify } = require('querystring');
 const { parse, serialize } = require('cookie');
 
+class ConsolePreview {
+    constructor(timeStamp, bmp) {
+        this.timeStamp = timeStamp;
+        this.bmp = bmp;
+    }
+}
+
 class Response {
     constructor(statusCode, headers, body) {
         this.statusCode = statusCode;
@@ -49,17 +56,18 @@ function request(host, path, cookie, requestBody) {
 async function preview(host, username, password) {
     const cookie = await login(host, username, password);
     await request(host, '/cgi/upgrade_process.cgi', cookie, {'fwtype': 255, 'time_stamp': (new Date()).toString()});
-    await request(host, '/cgi/CapturePreview.cgi', cookie, {'IKVM_PREVIEW.XML': '(0,0)', 'time_stamp': (new Date()).toString()});
+    const timeStamp = new Date();
+    await request(host, '/cgi/CapturePreview.cgi', cookie, {'IKVM_PREVIEW.XML': '(0,0)', 'time_stamp': timeStamp.toString()});
     await sleep(3000);
     const response = await request(host, '/cgi/url_redirect.cgi?' + stringify({
         'url_name': 'Snapshot',
         'url_type': 'img',
-        'time_stamp': (new Date())
+        'time_stamp': (new Date()).toString()
     }), cookie);
     if (response.statusCode !== 200) {
         throw new Error(`StatusCode is ${response.statusCode}`);
     }
-    return response.body;
+    return new ConsolePreview(timeStamp, response.body);
 }
 
 async function login(host, username, password) {
@@ -85,5 +93,3 @@ function sleep(ms) {
         setTimeout(() => resolve(), ms);
     });
 }
-
-preview('147.46.215.217', 'admin', '?').then(x => console.log(x)).catch(x => console.error(x));

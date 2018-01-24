@@ -259,7 +259,7 @@ async function globalHeartbeat() {
 
 function system(command) {
     return new Promise((resolve, reject) => {
-        exec(commandPrefix + command, (error, stdout, stderr) => {
+        exec(command, (error, stdout, stderr) => {
             if (error) {
                 reject(error);
             } else {
@@ -274,7 +274,6 @@ const slackConfig = config['slack'];
 const channelId = slackConfig['channel'];
 const globalSupervised = config['supervised'];
 const pingConfig = config['ping'];
-const commandPrefix = config['command_prefix'];
 
 const messageCards = new MessageCards();
 const hostList = [];
@@ -313,3 +312,5 @@ createServer((req, res) => {
     res.setHeader('Content-Type', 'text/plain');
     res.end('Sending hello message...\n');
 }).listen(config['management_port'], '127.0.0.1', () => console.log(`management port: ${config['management_port']}`));
+
+exports.system = system;

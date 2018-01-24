@@ -1,6 +1,5 @@
 {
     "management_port": 50002,
-    "command_prefix": "ssh -o ConnectTimeout=3 cmscluster.snu.ac.kr -- ",
     "supervised": true,
     "ping": {
         "count": 1,
