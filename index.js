@@ -207,17 +207,22 @@ class MessageCard {
         if (this.recoverToAutomatic) {
             text += `\n:white_check_mark: Recovering to automatic mode for this host.`;
         }
-        return {
-            attachments: [
-              {
-                'color': '#2222aa',
-                'title': `${this.host.hostId} is sleeping`,
-                'text': text,
-                'actions': actions,
-                'callback_id': this.callbackId
-              }
-            ]
-          }
+        const attachments = [{
+            'color': '#2222aa',
+            'title': `${this.host.hostId} is sleeping`,
+            'text': text,
+            'actions': actions,
+            'callback_id': this.callbackId
+        }];
+        if (this.consolePreview !== null) {
+            attachments.push({
+                'text': 'Console Preview',
+                'color': '#555555',
+                'image_url': 'http://via.placeholder.com/350x150',
+                'ts': Math.floor(this.consolePreview.timeStamp.getTime()/1000)
+            });
+        }
+        return {attachments: attachments};
     }
 
     post() {
