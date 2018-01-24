@@ -4,6 +4,7 @@ const uuidv4 = require('uuid/v4');
 const { readFileSync } = require('fs');
 const { exec } = require('child_process');
 const { createServer } = require('http');
+const { preview } = require('./preview');
 
 const HostStatus = {
     UNKNOWN: 0,
@@ -24,6 +25,11 @@ class Host {
         this.status = HostStatus.UNKNOWN;
         this.pingFailures = 0;
         this.timeout = null;
+        this.consolePreview = null;
+    }
+
+    get consolePreviewNeeded() {
+        return this.status === HostStatus.DOWN || this.status === HostStatus.TESTING_REBOOT || this.status === HostStatus.WAITING_REBOOT;
     }
 
     async heartbeat() {
@@ -45,10 +51,15 @@ class Host {
 
     async transition(newStatus) {
         const oldStatus = this.status;
+        const oldConsolePreviewNeeded = this.consolePreviewNeeded;
         if (oldStatus === newStatus) {
             return;
         }
         this.status = newStatus;
+        const newConsolePreviewNeeded = this.consolePreviewNeeded;
+        if (!oldConsolePreviewNeeded && newConsolePreviewNeeded) {
+            consolePreviewUpdate(host).catch(error => console.error(error));
+        }
         this.pingFailures = 0;
         if (this.timeout) {
             clearTimeout(this.timeout);
@@ -267,6 +278,14 @@ function system(command) {
             }
         });
     });
+}
+
+async function consolePreviewUpdate(host) {
+    const consolePreview = await preview(host.ipmiHost, 'elsabot', host.ipmiPassword);
+    host.consolePreview = consolePreview;
+    if (host.consolePreviewNeeded) {
+        consolePreviewUpdate(host).catch(error => console.error(error));
+    }
 }
 
 const config = JSON.parse(readFileSync('config.json', 'utf8'));

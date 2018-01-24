@@ -114,5 +114,7 @@ function sleep(ms) {
     });
 }
 
+exports.preview = preview;
+
 // const fs = require('fs');
 // preview('147.46.215.217', 'admin', '').then(x => fs.writeFile('./x', x.png, (err) => console.log(err))).catch(x => console.error(x));
