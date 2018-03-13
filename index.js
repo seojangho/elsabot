@@ -145,7 +145,7 @@ class Host {
                 if (this.supervised || this.ipmiHost === null) {
                     return true;
                 } else {
-                    newCard.rebootRequested = true;
+                    newCard.rebootRequested.value = true;
                     return await this.transition(HostStatus.WAITING_REBOOT);
                 }
             }
@@ -164,7 +164,7 @@ class Host {
                 } catch (e) {
                     console.error(e);
                     if (messageCard !== undefined) {
-                        messageCard.hasIpmiError = true;
+                        messageCard.hasIpmiError.value = true;
                     }
                     return await this.transition(HostStatus.DOWN);
                 }
@@ -184,9 +184,9 @@ class MessageCard {
         this.recurred = new TimedValue(recurred);
 
         this.status = new TimedValue(HostStatus.DOWN);
-        this.rebootRequested = false;
+        this.rebootRequested = new TimedValue(false);
         this.rebootRequestedBy = null;
-        this.hasIpmiError = false;
+        this.hasIpmiError = new TimedValue(false);
         this.dropToSupervised = false;
         this.recoverToAutomatic = false;
         this.consolePreview = null;
@@ -199,15 +199,16 @@ class MessageCard {
         } else {
             text += `Not responding to ping for last ${pingConfig['loop_period'] * pingConfig['num_trials_before_down']} seconds.`;
         }
-        text += ` ${this.recurred.timeFormatting}`;
+        text += ` (${this.recurred.timeFormatting})`;
         const actions = [];
-        if (this.rebootRequested) {
+        if (this.rebootRequested.value) {
             if (this.rebootRequestedBy !== null) {
                 text += `\n:white_check_mark: <@${this.rebootRequestedBy}> knocks the door!`;
             } else {
                 text += `\n:white_check_mark: Rebooting automatically...`;
             }
             text += ` (Sending IPMI reset command)`;
+            text += ` (${this.rebootRequested.timeFormatting})`;
         } else if (this.status.value === HostStatus.DOWN && this.host.ipmiHost) {
             actions.push({
                 'name': 'reset',
@@ -216,17 +217,20 @@ class MessageCard {
                 'type': 'button'
             });
         }
-        if (this.hasIpmiError) {
+        if (this.hasIpmiError.value) {
             text += '\n:x: An error occurred while issuing IPMI command.';
+            text += ` (${this.hasIpmiError.timeFormatting})`;
         }
         if (this.status.value === HostStatus.WAITING_REBOOT || this.status.value === HostStatus.TESTING_REBOOT) {
             text += '\n:arrows_counterclockwise: Checking reachability...';
         }
         if (this.status.value === HostStatus.NORMAL) {
             text += `\n:white_check_mark: She's back!`;
+            text += ` (${this.status.timeFormatting})`;
         }
-        if (this.rebootRequested && this.status.value === HostStatus.DOWN) {
+        if (this.rebootRequested.value && this.status.value === HostStatus.DOWN) {
             text += `\n:x: Failed to reboot... sorry about that.`;
+            text += ` (${this.status.timeFormatting})`;
         }
         if (this.dropToSupervised) {
             text += `\n:x: Dropping to supervised mode for this host.`
@@ -298,7 +302,7 @@ async function rebootRequested(callbackId, userId) {
     if (card === undefined) {
         return await web.chat.postEphemeral(channelId, 'Unknown callbackId\n(It seems that elsabot has suffered a restart. Sorry about that.)', userId);
     }
-    card.rebootRequested = true;
+    card.rebootRequested.value = true;
     card.rebootRequestedBy = userId;
     await card.host.post(await card.host.transition(HostStatus.WAITING_REBOOT));
 }
