@@ -401,7 +401,7 @@ previewServer.use(koaRoute.get('/preview/:callbackId/:timestamp/preview.png', (c
 }));
 previewServer.listen(previewConfig['port']);
 
-const rtm = new RTMClient(slackConfig['token']);
+const rtm = new RtmClient(slackConfig['token']);
 rtm.start();
 
 exports.system = system;
