@@ -16,6 +16,25 @@ const HostStatus = {
     WAITING_REBOOT: 4
 };
 
+class TimedValue {
+    constructor(initialValue) {
+        this.value = initialValue;
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    set value(newValue) {
+        this._value = newValue;
+        this._timestamp = Math.floor(new Date() / 1000);
+    }
+
+    get timestamp() {
+        return this._timestamp;
+    }
+}
+
 class Host {
     constructor(hostId, pingHost, ipmiHost, ipmiPassword) {
         this.hostId = hostId;
@@ -24,14 +43,14 @@ class Host {
         this.ipmiPassword = ipmiPassword;
 
         this.supervised = globalSupervised;
-        this.status = HostStatus.UNKNOWN;
+        this.status = new TimedValue(HostStatus.UNKNOWN);
         this.pingFailures = 0;
         this.timeout = null;
         this.consolePreview = null;
     }
 
     get consolePreviewNeeded() {
-        return this.status === HostStatus.DOWN || this.status === HostStatus.TESTING_REBOOT || this.status === HostStatus.WAITING_REBOOT;
+        return this.status.value === HostStatus.DOWN || this.status.value === HostStatus.TESTING_REBOOT || this.status.value === HostStatus.WAITING_REBOOT;
     }
 
     async heartbeat() {
@@ -40,7 +59,7 @@ class Host {
             this.pingFailures = 0;
             await this.post(await this.transition(HostStatus.NORMAL));
         } catch (e) {
-            if (this.status === HostStatus.WAITING_REBOOT) {
+            if (this.status.value === HostStatus.WAITING_REBOOT) {
                 await this.post(false);
                 return;
             }
@@ -77,12 +96,12 @@ class Host {
     }
 
     async transition(newStatus) {
-        const oldStatus = this.status;
+        const oldStatus = this.status.value;
         const oldConsolePreviewNeeded = this.consolePreviewNeeded;
         if (oldStatus === newStatus) {
             return false;
         }
-        this.status = newStatus;
+        this.status.value = newStatus;
         const newConsolePreviewNeeded = this.consolePreviewNeeded;
         if (!oldConsolePreviewNeeded && newConsolePreviewNeeded) {
             consolePreviewUpdate(this).catch(error => console.error(error));
@@ -94,7 +113,7 @@ class Host {
         }
         const messageCard = messageCards.tryGetByHostId(this.hostId);
         if (messageCard !== undefined) {
-            messageCard.status = newStatus;
+            messageCard.status.value = newStatus;
         }
         switch (newStatus) {
             case HostStatus.TESTING_REBOOT: {
@@ -159,7 +178,7 @@ class MessageCard {
         this.messageTs = null;
         this.recurred = recurred;
 
-        this.status = HostStatus.DOWN;
+        this.status = new TimedValue(HostStatus.DOWN);
         this.rebootRequested = false;
         this.rebootRequestedBy = null;
         this.hasIpmiError = false;
@@ -183,7 +202,7 @@ class MessageCard {
                 text += `\n:white_check_mark: Rebooting automatically...`;
             }
             text += ` (Sending IPMI reset command)`;
-        } else if (this.status === HostStatus.DOWN && this.host.ipmiHost) {
+        } else if (this.status.value === HostStatus.DOWN && this.host.ipmiHost) {
             actions.push({
                 'name': 'reset',
                 'value': 'reset',
@@ -194,13 +213,13 @@ class MessageCard {
         if (this.hasIpmiError) {
             text += '\n:x: An error occurred while issuing IPMI command.';
         }
-        if (this.status === HostStatus.WAITING_REBOOT || this.status === HostStatus.TESTING_REBOOT) {
+        if (this.status.value === HostStatus.WAITING_REBOOT || this.status.value === HostStatus.TESTING_REBOOT) {
             text += '\n:arrows_counterclockwise: Checking reachability...';
         }
-        if (this.status === HostStatus.NORMAL) {
+        if (this.status.value === HostStatus.NORMAL) {
             text += `\n:white_check_mark: She's back!`;
         }
-        if (this.rebootRequested && this.status === HostStatus.DOWN) {
+        if (this.rebootRequested && this.status.value === HostStatus.DOWN) {
             text += `\n:x: Failed to reboot... sorry about that.`;
         }
         if (this.dropToSupervised) {
