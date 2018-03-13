@@ -1,5 +1,5 @@
 const { WebClient } = require('@slack/client');
-const { RTMClient } = require('@slack/client');
+const { RtmClient } = require('@slack/client');
 const { createMessageAdapter } = require('@slack/interactive-messages');
 const uuidv4 = require('uuid/v4');
 const { readFileSync } = require('fs');
