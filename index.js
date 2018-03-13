@@ -34,6 +34,10 @@ class TimedValue {
     get timestamp() {
         return this._timestamp;
     }
+
+    get timeFormatting() {
+        return `<!date^${this.timestamp}^{date_pretty} {time_secs}|${this.timestamp}>`;
+    }
 }
 
 class Host {
@@ -177,7 +181,7 @@ class MessageCard {
         this.host = host;
         this.callbackId = uuidv4();
         this.messageTs = null;
-        this.recurred = recurred;
+        this.recurred = new TimedValue(recurred);
 
         this.status = new TimedValue(HostStatus.DOWN);
         this.rebootRequested = false;
@@ -190,11 +194,12 @@ class MessageCard {
 
     get attachments() {
         let text = '';
-        if (this.recurred) {
+        if (this.recurred.value) {
             text += 'This host is still unresponsive.';
         } else {
             text += `Not responding to ping for last ${pingConfig['loop_period'] * pingConfig['num_trials_before_down']} seconds.`;
         }
+        text += ` ${this.recurred.timeFormatting}`;
         const actions = [];
         if (this.rebootRequested) {
             if (this.rebootRequestedBy !== null) {
