@@ -55,6 +55,9 @@ class Host {
     }
 
     get consolePreviewNeeded() {
+        if (!this.ipmiHost) {
+          return false;
+        }
         return this.status.value === HostStatus.DOWN || this.status.value === HostStatus.TESTING_REBOOT || this.status.value === HostStatus.WAITING_REBOOT;
     }
 
