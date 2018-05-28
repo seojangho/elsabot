@@ -203,6 +203,9 @@ class MessageCard {
             text += `Not responding to ping for last ${pingConfig['loop_period'] * pingConfig['num_trials_before_down']} seconds.`;
         }
         text += ` (${this.recurred.timeFormatting})`;
+        if (!this.host.ipmiHost) {
+            text += `\n:scream: This host does not support IPMI!`;
+        }
         const actions = [];
         if (this.rebootRequested.value) {
             if (this.rebootRequestedBy !== null) {
