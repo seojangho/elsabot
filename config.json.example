@@ -10,7 +10,7 @@
         "deadline": 3,
         "loop_period": 10,
         "num_trials_before_down": 3,
-        "reboot_wait": 300
+        "reboot_wait": 250
     },
     "slack": {
         "token": "??????????????",
