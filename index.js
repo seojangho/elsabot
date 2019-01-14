@@ -1,3 +1,4 @@
+const net = require('net')
 const { WebClient } = require('@slack/client')
 const { RtmClient } = require('@slack/client')
 const { createMessageAdapter } = require('@slack/interactive-messages')
@@ -63,7 +64,7 @@ class Host {
 
   async heartbeat () {
     try {
-      await system(`ping -c${pingConfig['count']} -w${pingConfig['deadline']} ${this.pingHost}`)
+      await sshProbe(this.pingHost, pingConfig['timeout'])
       this.pingFailures = 0
       await this.post(await this.transition(HostStatus.NORMAL))
     } catch (e) {
@@ -202,7 +203,7 @@ class MessageCard {
     if (this.recurred.value) {
       text += 'This host is still unresponsive.'
     } else {
-      text += `Not responding to ping for last ${pingConfig['loop_period'] * pingConfig['num_trials_before_down']} seconds.`
+      text += `SSH daemon is not responding for last ${pingConfig['loop_period'] * pingConfig['num_trials_before_down']} seconds.`
     }
     text += ` (${this.recurred.timeFormatting})`
     if (!this.host.ipmiHost) {
@@ -345,6 +346,23 @@ function system (command) {
       } else {
         resolve(stdout)
       }
+    })
+  })
+}
+
+function sshProbe (host, timeout) {
+  return new Promise((resolve, reject) => {
+    const probe = net.createConnection({ port: 22, host: host, timeout: timeout * 1000 }, () => {
+      probe.end()
+      resolve()
+    })
+    probe.on('error', () => {
+      probe.destroy()
+      reject(new Error(`Cannot connect to ssh port (host: ${host})`))
+    })
+    probe.on('timeout', () => {
+      probe.destroy()
+      reject(new Error(`Timeout occurred while connecting to ssh port (host: ${host})`))
     })
   })
 }

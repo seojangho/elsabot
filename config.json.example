@@ -6,8 +6,7 @@
     "management_port": 50002,
     "supervised": true,
     "ping": {
-        "count": 1,
-        "deadline": 3,
+        "timeout": 3,
         "loop_period": 10,
         "num_trials_before_down": 3,
         "reboot_wait": 250
