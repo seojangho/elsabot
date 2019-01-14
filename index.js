@@ -19,7 +19,7 @@ const HostStatus = {
 
 class TimedValue {
   constructor (initialValue) {
-    this.value = initialValue
+    this._value = initialValue
   }
 
   get value () {
