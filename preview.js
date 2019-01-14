@@ -45,10 +45,19 @@ function request (host, path, cookie, requestBody) {
       response.on('data', chunk => responseBody.push(chunk))
       response.on('end', () => resolve(new Response(
         response.statusCode, response.headers, Buffer.concat(responseBody))))
-      response.on('error', error => reject(error))
+      response.on('error', error => {
+        request.destroy()
+        reject(error)
+      })
     })
-    request.on('error', error => reject(error))
-    request.on('timeout', () => reject(new Error('Timeout')))
+    request.on('error', error => {
+      request.destroy()
+      reject(error)
+    })
+    request.on('timeout', () => {
+      request.destroy()
+      reject(new Error('Timeout'))
+    })
     if (requestBody !== undefined) {
       request.write(requestBodyString)
     }
