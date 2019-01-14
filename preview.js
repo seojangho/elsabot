@@ -19,7 +19,13 @@ class Response {
 }
 
 function request (host, path, cookie, requestBody) {
+  const resolved = {resolved: false}
   return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (!resolved.resolved) {
+        reject(new Error('Tiemout'))
+      }
+    }, 3000)
     const requestBodyString = requestBody === undefined ? undefined : stringify(requestBody)
     const serializedCookies = []
     for (const cookieName in cookie) {
@@ -42,8 +48,10 @@ function request (host, path, cookie, requestBody) {
     const responseBody = []
     const request = https.request(options, response => {
       response.on('data', chunk => responseBody.push(chunk))
-      response.on('end', () => resolve(new Response(
-        response.statusCode, response.headers, Buffer.concat(responseBody))))
+      response.on('end', () => {
+        resolve(new Response(response.statusCode, response.headers, Buffer.concat(responseBody)))
+        resolved.resolved = true
+      })
       response.on('error', error => reject(error))
     })
     request.on('error', error => reject(error))
