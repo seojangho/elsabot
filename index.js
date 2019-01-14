@@ -262,7 +262,7 @@ class MessageCard {
         'ts': Math.floor(this.consolePreview.timeStamp.getTime() / 1000)
       })
     }
-    return { attachments: attachments }
+    return attachments
   }
 
   post () {
