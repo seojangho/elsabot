@@ -21,6 +21,7 @@ const HostStatus = {
 class TimedValue {
   constructor (initialValue) {
     this._value = initialValue
+    this._timestamp = Math.floor(new Date() / 1000)
   }
 
   get value () {
