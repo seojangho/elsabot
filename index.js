@@ -268,10 +268,10 @@ class MessageCard {
 
   post () {
     if (this.messageTs === null) {
-      return web.chat.postMessage({channel: channelId, text: '', attachments: this.attachments})
+      return web.chat.postMessage({ channel: channelId, text: '', attachments: this.attachments })
         .then(response => { this.messageTs = response.ts; return response })
     } else {
-      return web.chat.update({ts: this.messageTs, channel: channelId, text: '', attachments: this.attachments})
+      return web.chat.update({ ts: this.messageTs, channel: channelId, text: '', attachments: this.attachments })
     }
   }
 }
@@ -310,7 +310,7 @@ class MessageCards {
 async function rebootRequested (callbackId, userId) {
   const card = messageCards.tryGetByCallbackId(callbackId)
   if (card === undefined) {
-    await web.chat.postEphemeral({channel: channelId, text: 'Unknown callbackId\n(It seems that elsabot has suffered a restart. Sorry about that.)', user: userId})
+    await web.chat.postEphemeral({ channel: channelId, text: 'Unknown callbackId\n(It seems that elsabot has suffered a restart. Sorry about that.)', user: userId })
     return
   }
   card.rebootRequested.value = true
@@ -402,7 +402,9 @@ listener.start(slackConfig['port']).then(() => {
 globalHeartbeat().catch(reason => console.error(reason))
 
 createServer((req, res) => {
-  web.chat.postMessage({channel: channelId, text: 'Hi, there! Elsabot is up and running!', attachments: [
+  web.chat.postMessage({ channel: channelId,
+    text: 'Hi, there! Elsabot is up and running!',
+    attachments: [
       {
         'color': '#2222aa',
         'title': 'The following hosts are covered:',
