@@ -1,6 +1,6 @@
 const net = require('net')
 const { WebClient } = require('@slack/client')
-const { RtmClient } = require('@slack/client')
+const { RTMClient } = require('@slack/client')
 const { createMessageAdapter } = require('@slack/interactive-messages')
 const uuidv4 = require('uuid/v4')
 const { readFileSync } = require('fs')
@@ -436,7 +436,7 @@ previewServer.use(koaRoute.get('/preview/:callbackId/:timestamp/preview.png', (c
 }))
 previewServer.listen(previewConfig['port'])
 
-const rtm = new RtmClient(slackConfig['token'])
+const rtm = new RTMClient(slackConfig['token'])
 rtm.start()
 
 exports.system = system
