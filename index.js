@@ -311,6 +311,7 @@ async function rebootRequested (callbackId, userId) {
   const card = messageCards.tryGetByCallbackId(callbackId)
   if (card === undefined) {
     await web.chat.postEphemeral({channel: channelId, text: 'Unknown callbackId\n(It seems that elsabot has suffered a restart. Sorry about that.)', user: userId})
+    return
   }
   card.rebootRequested.value = true
   card.rebootRequestedBy = userId
