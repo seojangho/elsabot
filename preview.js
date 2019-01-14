@@ -33,7 +33,8 @@ function request (host, path, cookie, requestBody) {
       rejectUnauthorized: false,
       headers: {
         Cookie: serializedCookies.join('; ')
-      }
+      },
+      timeout: 20000
     }
     if (requestBody !== undefined) {
       options.headers['Content-Length'] = requestBodyString.length
@@ -47,6 +48,7 @@ function request (host, path, cookie, requestBody) {
       response.on('error', error => reject(error))
     })
     request.on('error', error => reject(error))
+    request.on('timeout', () => reject(new Error('Timeout')))
     if (requestBody !== undefined) {
       request.write(requestBodyString)
     }
