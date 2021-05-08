@@ -5,7 +5,7 @@
   "author": "JangHo Seo <jangho@jangho.kr>",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@slack/client": "^4.8.0",
+    "@slack/client": "^5.0.2",
     "@slack/interactive-messages": "^1.4.0",
     "body-parser": "^1.18.2",
     "cookie": "^0.3.1",
